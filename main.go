@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/gomarkdown/markdown"
 	"os"
-    "strings"
-    "github.com/gomarkdown/markdown"
+	"strings"
 )
 
 func main() {
-    header := `
+	// TODO: Probably put this into a file and load up as a template string
+	header := `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,39 +19,47 @@ func main() {
 </head>
 <body>
     `
-    footer := "</body></html>"
+	footer := "</body></html>"
 
-    contentDirectory := "content"
+	// TODO: Use this information to build up an index for inter-linking of articles
+	contentDirectory := "content"
 	contents, err := os.ReadDir(contentDirectory)
-    if err != nil {
-        panic(err)
-    }
+	// TODO: tidy up error checking
+	if err != nil {
+		panic(err)
+	}
 
-    err = os.Mkdir("build", 0755)
-    if err != nil {
-        panic(err)
-    }
+	// TODO: Only do this if directory doesn't exist
+	err = os.Mkdir("build", 0755)
+	if err != nil {
+		panic(err)
+	}
 
-    for _, entry := range contents {
-        mdName := entry.Name()
-        htmlName := strings.Replace(mdName, ".md", ".html", -1)
-        md, err := os.ReadFile(contentDirectory + "/" + mdName)
-        if err != nil {
-            panic(err)
-        }
+	// TODO: Generate an index.html that acts as the main directory
 
-        body := markdown.ToHTML(md, nil, nil)
-        html := header + "<h1>" + mdName + "</h1>\n" + string(body) + footer
+	for _, entry := range contents {
+		// TODO: Determine 'doc name' i.e. filename without extension
+		// Replace underscores with spaces, e.g. "multiple_sclerosis" -> "multiple sclerosis"
+		mdName := entry.Name()
+		htmlName := strings.Replace(mdName, ".md", ".html", -1)
+		md, err := os.ReadFile(contentDirectory + "/" + mdName)
+		if err != nil {
+			panic(err)
+		}
 
-        file, err := os.Create("build/" + htmlName)
-        if err != nil {
-            panic(err)
-        }
-        defer file.Close()
+		body := markdown.ToHTML(md, nil, nil)
+		html := header + "<h1>" + mdName + "</h1>\n" + string(body) + footer
 
-        _, err = file.WriteString(html)
-        if err != nil {
-            panic(err)
-        }
-    }
+		// TODO: Overwrite file if exists
+		file, err := os.Create("build/" + htmlName)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		_, err = file.WriteString(html)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
