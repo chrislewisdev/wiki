@@ -1,0 +1,1 @@
+This is a work-in-progress repo for a personal wiki generator that can take various markdown files and generate static site content organised in a wiki-like fashion with links between related topics.
