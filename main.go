@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gomarkdown/markdown"
+	"io/fs"
 	"os"
 	"strings"
 )
@@ -12,7 +13,24 @@ func check(err error) {
 	}
 }
 
-func main() {
+func getFiles(directory string) []fs.DirEntry {
+	contents, err := os.ReadDir(directory)
+	check(err)
+	return contents
+}
+
+func ensureDirectoryExists(directory string) {
+	stat, err := os.Stat(directory)
+	if err != nil && os.IsNotExist(err) {
+		// TODO: Replace magic constant
+		err = os.Mkdir(directory, 0755)
+		check(err)
+	} else if !stat.IsDir() {
+		panic("Cannot create '" + directory + "' directory; a file by that name exists")
+	}
+}
+
+func renderHtml(md []byte, docName string) string {
 	// TODO: Probably put this into a file and load up as a template string
 	header := `
 <!DOCTYPE html>
@@ -27,38 +45,44 @@ func main() {
     `
 	footer := "</body></html>"
 
-	// TODO: Use this information to build up an index for inter-linking of articles
-	contentDirectory := "content"
-	contents, err := os.ReadDir(contentDirectory)
-	check(err)
+	body := markdown.ToHTML(md, nil, nil)
+	// TODO: Convert doc name to sentence case
+	html := header + "<h1>" + docName + "</h1>\n" + string(body) + footer
 
+	return html
+}
+
+func writeFile(filename string, contents string) {
+	file, err := os.Create(filename)
+	check(err)
+	defer file.Close()
+
+	_, err = file.WriteString(contents)
+	check(err)
+}
+
+func main() {
+	contentDirectory := "content"
 	buildDirectory := "build"
-	stat, err := os.Stat(buildDirectory)
-	if err != nil && os.IsNotExist(err) {
-		err = os.Mkdir(buildDirectory, 0755)
-		check(err)
-	} else if !stat.IsDir() {
-		panic("Cannot create 'build' directory; a file by that name exists")
-	}
+
+	// TODO: Use this information to build up an index for inter-linking of articles
+	content := getFiles(contentDirectory)
+
+	ensureDirectoryExists(buildDirectory)
 
 	// TODO: Generate an index.html that acts as the main directory
 
-	for _, entry := range contents {
-		// TODO: Determine 'doc name' i.e. filename without extension
-		// Replace underscores with spaces, e.g. "multiple_sclerosis" -> "multiple sclerosis"
+	for _, entry := range content {
+		// TODO: Replace underscores with spaces, e.g. "multiple_sclerosis" -> "multiple sclerosis"
 		mdName := entry.Name()
-		htmlName := strings.Replace(mdName, ".md", ".html", -1)
+		docName := strings.Split(mdName, ".")[0]
+		htmlName := docName + ".html"
+
 		md, err := os.ReadFile(contentDirectory + "/" + mdName)
 		check(err)
 
-		body := markdown.ToHTML(md, nil, nil)
-		html := header + "<h1>" + mdName + "</h1>\n" + string(body) + footer
+		html := renderHtml(md, docName)		
 
-		file, err := os.Create("build/" + htmlName)
-		check(err)
-		defer file.Close()
-
-		_, err = file.WriteString(html)
-		check(err)
+		writeFile(buildDirectory + "/" + htmlName, html)		
 	}
 }
