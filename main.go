@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	// TODO: Probably put this into a file and load up as a template string
 	header := `
@@ -24,15 +30,15 @@ func main() {
 	// TODO: Use this information to build up an index for inter-linking of articles
 	contentDirectory := "content"
 	contents, err := os.ReadDir(contentDirectory)
-	// TODO: tidy up error checking
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
-	// TODO: Only do this if directory doesn't exist
-	err = os.Mkdir("build", 0755)
-	if err != nil {
-		panic(err)
+	buildDirectory := "build"
+	stat, err := os.Stat(buildDirectory)
+	if err != nil && os.IsNotExist(err) {
+		err = os.Mkdir(buildDirectory, 0755)
+		check(err)
+	} else if !stat.IsDir() {
+		panic("Cannot create 'build' directory; a file by that name exists")
 	}
 
 	// TODO: Generate an index.html that acts as the main directory
@@ -43,23 +49,16 @@ func main() {
 		mdName := entry.Name()
 		htmlName := strings.Replace(mdName, ".md", ".html", -1)
 		md, err := os.ReadFile(contentDirectory + "/" + mdName)
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 
 		body := markdown.ToHTML(md, nil, nil)
 		html := header + "<h1>" + mdName + "</h1>\n" + string(body) + footer
 
-		// TODO: Overwrite file if exists
 		file, err := os.Create("build/" + htmlName)
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 		defer file.Close()
 
 		_, err = file.WriteString(html)
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 	}
 }
