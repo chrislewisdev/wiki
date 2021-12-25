@@ -34,6 +34,26 @@ func ensureDirectoryExists(directory string) {
 	}
 }
 
+func toDocName(mdName string) string {
+	return strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
+}
+
+func toHtmlName(mdName string) string {
+	return strings.Replace(mdName, ".md", ".html", 1)
+}
+
+func generateIndex(content []fs.DirEntry) []byte {
+	var index = ""
+
+	for _, entry := range content {
+		mdName := entry.Name()
+		link := "[" + toDocName(mdName) + "](./" + toHtmlName(mdName) + ")"
+		index = index + " - " + link + "\n"
+	}
+
+	return []byte(index)
+}
+
 func renderHtml(md []byte, docName string) string {
 	// TODO: Probably put this into a file and load up as a template string
 	header := `
@@ -50,7 +70,6 @@ func renderHtml(md []byte, docName string) string {
 	footer := "</body></html>"
 
 	body := markdown.ToHTML(md, nil, nil)
-	// TODO: Convert doc name to sentence case
 	html := header + "<h1>" + toSentenceCase(docName) + "</h1>\n" + string(body) + footer
 
 	return html
@@ -74,13 +93,14 @@ func main() {
 
 	ensureDirectoryExists(buildDirectory)
 
-	// TODO: Generate an index.html that acts as the main directory
+	// Generate index
+	writeFile(buildDirectory + "/index.html", renderHtml(generateIndex(content), "index"))
 
+	// Render out all md -> html files
 	for _, entry := range content {
-		// TODO: Replace underscores with spaces, e.g. "multiple_sclerosis" -> "multiple sclerosis"
 		mdName := entry.Name()
-		docName := strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
-		htmlName := strings.Replace(mdName, ".md", ".html", 1)
+		docName := toDocName(mdName)
+		htmlName := toHtmlName(mdName)
 
 		md, err := os.ReadFile(contentDirectory + "/" + mdName)
 		check(err)
