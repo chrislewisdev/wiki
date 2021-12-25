@@ -13,6 +13,10 @@ func check(err error) {
 	}
 }
 
+func toSentenceCase(str string) string {
+	return strings.ToUpper(str[0:1]) + str[1:len(str)]
+}
+
 func getFiles(directory string) []fs.DirEntry {
 	contents, err := os.ReadDir(directory)
 	check(err)
@@ -47,7 +51,7 @@ func renderHtml(md []byte, docName string) string {
 
 	body := markdown.ToHTML(md, nil, nil)
 	// TODO: Convert doc name to sentence case
-	html := header + "<h1>" + docName + "</h1>\n" + string(body) + footer
+	html := header + "<h1>" + toSentenceCase(docName) + "</h1>\n" + string(body) + footer
 
 	return html
 }
@@ -75,8 +79,8 @@ func main() {
 	for _, entry := range content {
 		// TODO: Replace underscores with spaces, e.g. "multiple_sclerosis" -> "multiple sclerosis"
 		mdName := entry.Name()
-		docName := strings.Split(mdName, ".")[0]
-		htmlName := docName + ".html"
+		docName := strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
+		htmlName := strings.Replace(mdName, ".md", ".html", 1)
 
 		md, err := os.ReadFile(contentDirectory + "/" + mdName)
 		check(err)
