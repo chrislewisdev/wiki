@@ -1,4 +1,4 @@
-This page contains a links to pages, blog posts, or anything else online that I have found useful and/or inspiring. I'll add more as I discover more cool stuff online!
+This page contains links to pages, blog posts, or anything else online that I have found useful and/or inspiring. I'll add more as I discover more cool stuff online!
 
 ## Blog posts / articles
 
@@ -12,7 +12,3 @@ This page contains a links to pages, blog posts, or anything else online that I 
 ## Tools
 
 - [lazygit](https://github.com/jesseduffield/lazygit) - handy terminal-based UI for git
-
-## Entertainment
-
-- [Cataclysm: Dark Days Ahead](https://cataclysmdda.org/) - looks like a pretty neat open-source survival game playable in the terminal
