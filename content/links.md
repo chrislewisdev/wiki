@@ -1,8 +1,9 @@
-This page contains links to pages, blog posts, or anything else online that I have found useful and/or inspiring. I'll add more as I discover more cool stuff online!
+This page contains links to pages, blog posts, or anything else online that I have found interesting, useful and/or inspiring. I'll add more as I discover more cool stuff online!
 
 ## Blog posts / articles
 
 - [Permacomputing](http://viznut.fi/texts-en/permacomputing.html) by viznut
+- [Against 3X Speed](https://perell.com/essay/against-3x-speed/) by David Perrell
 
 ## Wikis / Blogs
 
