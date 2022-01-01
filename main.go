@@ -66,7 +66,8 @@ func renderHtml(md []byte, docName string) string {
     <title>Document</title>
 </head>
 <body>
-    `
+	<a href="./index.html">index</a>
+	`
 	footer := "</body></html>"
 
 	body := markdown.ToHTML(md, nil, nil)
