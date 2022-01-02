@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gomarkdown/markdown"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -12,12 +13,12 @@ type document struct {
 	htmlFile	string
 }
 
-func toDocName(mdName string) string {
-	return strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
+func toDocName(mdFile string) string {
+	return strings.Replace(strings.Split(mdFile, ".")[0], "_", " ", -1)
 }
 
-func toHtmlName(mdName string) string {
-	return strings.Replace(mdName, ".md", ".html", 1)
+func toHtmlName(mdFile string) string {
+	return strings.Replace(mdFile, ".md", ".html", 1)
 }
 
 func newDocument(mdFile string) document {
@@ -56,7 +57,7 @@ func ensureDirectoryExists(directory string) {
 	}
 }
 
-func generateIndex(docs []document) []byte {
+func generateIndex(docs []document) string {
 	var index = ""
 
 	for _, doc := range docs {
@@ -64,10 +65,20 @@ func generateIndex(docs []document) []byte {
 		index = index + " - " + link + "\n"
 	}
 
-	return []byte(index)
+	return index
 }
 
-func renderHtml(md []byte, docName string) string {
+func autolink(doc document, md string, docs []document) string {
+	for _, otherDoc := range docs {
+		if doc.name != otherDoc.name {
+			regex := regexp.MustCompile("(?i)(" + otherDoc.name + ")")
+			md = regex.ReplaceAllString(string(md), "[$1](./" + otherDoc.htmlFile + ")")
+		}
+	}
+	return md
+}
+
+func renderHtml(md string, docName string) string {
 	// TODO: Probably put this into a file and load up as a template string
 	header := `
 <!DOCTYPE html>
@@ -83,7 +94,7 @@ func renderHtml(md []byte, docName string) string {
 	`
 	footer := "</body></html>"
 
-	body := markdown.ToHTML(md, nil, nil)
+	body := markdown.ToHTML([]byte(md), nil, nil)
 	html := header + "<h1>" + toSentenceCase(docName) + "</h1>\n" + string(body) + footer
 
 	return html
@@ -102,7 +113,6 @@ func main() {
 	contentDirectory := "content"
 	buildDirectory := "build"
 
-	// TODO: Use this information to build up an index for inter-linking of articles
 	docs := getFiles(contentDirectory)
 
 	ensureDirectoryExists(buildDirectory)
@@ -113,10 +123,11 @@ func main() {
 
 	// Render out all md -> html files
 	for _, doc := range docs {
-		md, err := os.ReadFile(contentDirectory + "/" + doc.mdFile)
+		mdBytes, err := os.ReadFile(contentDirectory + "/" + doc.mdFile)
 		check(err)
 
-		// TODO: Autolinking
+		md := string(mdBytes)
+		md = autolink(doc, md, docs)
 
 		html := renderHtml(md, doc.name)
 
