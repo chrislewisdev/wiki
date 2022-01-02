@@ -4,11 +4,13 @@ This page contains links to pages, blog posts, or anything else online that I ha
 
 - [Permacomputing](http://viznut.fi/texts-en/permacomputing.html) by viznut
 - [Against 3X Speed](https://perell.com/essay/against-3x-speed/) by David Perrell
+- [sofa](https://tilde.town/~dozens/sofa/) - Start Often Finish rArely
 
 ## Wikis / Blogs
 
 - [xxiivv](https://wiki.xxiivv.com/site/home.html) - of particular note is also the [webring](https://webring.xxiivv.com/)
 - [Gwern](https://www.gwern.net/index) - astounding depth on just about anything
+- [nobr.me](https://nobr.me/) - delightfully chaotic
 
 ## Tools
 
