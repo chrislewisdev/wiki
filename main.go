@@ -71,7 +71,8 @@ func generateIndex(docs []document) string {
 func autolink(doc document, md string, docs []document) string {
 	for _, otherDoc := range docs {
 		if doc.name != otherDoc.name {
-			regex := regexp.MustCompile("(?i)(" + otherDoc.name + ")")
+			// This doesn't account for words appearing at the end of a sentence
+			regex := regexp.MustCompile("(?i)( " + otherDoc.name + " )")
 			md = regex.ReplaceAllString(string(md), "[$1](./" + otherDoc.htmlFile + ")")
 		}
 	}
