@@ -2,10 +2,27 @@ package main
 
 import (
 	"github.com/gomarkdown/markdown"
-	"io/fs"
 	"os"
 	"strings"
 )
+
+type document struct {
+	name		string
+	mdFile		string
+	htmlFile	string
+}
+
+func toDocName(mdName string) string {
+	return strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
+}
+
+func toHtmlName(mdName string) string {
+	return strings.Replace(mdName, ".md", ".html", 1)
+}
+
+func newDocument(mdFile string) document {
+	return document{toDocName(mdFile), mdFile, toHtmlName(mdFile)}
+}
 
 func check(err error) {
 	if err != nil {
@@ -17,10 +34,15 @@ func toSentenceCase(str string) string {
 	return strings.ToUpper(str[0:1]) + str[1:len(str)]
 }
 
-func getFiles(directory string) []fs.DirEntry {
+func getFiles(directory string) []document {
 	contents, err := os.ReadDir(directory)
 	check(err)
-	return contents
+
+	docs := []document{}
+	for _, entry := range contents {
+		docs = append(docs, newDocument(entry.Name()))
+	}
+	return docs
 }
 
 func ensureDirectoryExists(directory string) {
@@ -34,20 +56,11 @@ func ensureDirectoryExists(directory string) {
 	}
 }
 
-func toDocName(mdName string) string {
-	return strings.Replace(strings.Split(mdName, ".")[0], "_", " ", -1)
-}
-
-func toHtmlName(mdName string) string {
-	return strings.Replace(mdName, ".md", ".html", 1)
-}
-
-func generateIndex(content []fs.DirEntry) []byte {
+func generateIndex(docs []document) []byte {
 	var index = ""
 
-	for _, entry := range content {
-		mdName := entry.Name()
-		link := "[" + toDocName(mdName) + "](./" + toHtmlName(mdName) + ")"
+	for _, doc := range docs {
+		link := "[" + doc.name + "](./" + doc.htmlFile + ")"
 		index = index + " - " + link + "\n"
 	}
 
@@ -90,27 +103,23 @@ func main() {
 	buildDirectory := "build"
 
 	// TODO: Use this information to build up an index for inter-linking of articles
-	content := getFiles(contentDirectory)
+	docs := getFiles(contentDirectory)
 
 	ensureDirectoryExists(buildDirectory)
 
 	// Generate index
 	// TODO: Incorporate about information into index.html, and make it more brief
-	writeFile(buildDirectory + "/index.html", renderHtml(generateIndex(content), "index"))
+	writeFile(buildDirectory + "/index.html", renderHtml(generateIndex(docs), "index"))
 
 	// Render out all md -> html files
-	for _, entry := range content {
-		mdName := entry.Name()
-		docName := toDocName(mdName)
-		htmlName := toHtmlName(mdName)
-
-		md, err := os.ReadFile(contentDirectory + "/" + mdName)
+	for _, doc := range docs {
+		md, err := os.ReadFile(contentDirectory + "/" + doc.mdFile)
 		check(err)
 
 		// TODO: Autolinking
 
-		html := renderHtml(md, docName)		
+		html := renderHtml(md, doc.name)
 
-		writeFile(buildDirectory + "/" + htmlName, html)		
+		writeFile(buildDirectory + "/" + doc.htmlFile, html)		
 	}
 }
