@@ -95,6 +95,7 @@ func main() {
 	ensureDirectoryExists(buildDirectory)
 
 	// Generate index
+	// TODO: Incorporate about information into index.html, and make it more brief
 	writeFile(buildDirectory + "/index.html", renderHtml(generateIndex(content), "index"))
 
 	// Render out all md -> html files
@@ -105,6 +106,8 @@ func main() {
 
 		md, err := os.ReadFile(contentDirectory + "/" + mdName)
 		check(err)
+
+		// TODO: Autolinking
 
 		html := renderHtml(md, docName)		
 
