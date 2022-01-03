@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/gomarkdown/markdown"
+	"bytes"
+	"text/template"
 	"os"
 	"regexp"
 	"strings"
@@ -78,26 +80,22 @@ func autolink(doc document, md string, docs []document) string {
 	return md
 }
 
-func renderHtml(md string, docName string) string {
-	// TODO: Probably put this into a file and load up as a template string
-	header := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-	<a href="./index.html">index</a>
-	`
-	footer := "</body></html>"
-
+func renderHtml(layout *template.Template, md string, docName string) string {
 	body := markdown.ToHTML([]byte(md), nil, nil)
-	html := header + "<h1>" + toSentenceCase(docName) + "</h1>\n" + string(body) + footer
 
-	return html
+	templateData := struct {
+		Title string
+		Content string
+	}{
+		Title: toSentenceCase(docName),
+		Content: string(body),
+	}
+
+	buffer := &bytes.Buffer{}
+	err := layout.Execute(buffer, templateData)
+	check(err)
+
+	return buffer.String()
 }
 
 func writeFile(filename string, contents string) {
@@ -113,13 +111,15 @@ func main() {
 	contentDirectory := "content"
 	buildDirectory := "build"
 
-	docs := getFiles(contentDirectory)
-
 	ensureDirectoryExists(buildDirectory)
+
+	layout := template.Must(template.ParseFiles("design/layout.html"))
+
+	docs := getFiles(contentDirectory)
 
 	// Generate index
 	// TODO: Incorporate about information into index.html, and make it more brief
-	writeFile(buildDirectory + "/index.html", renderHtml(generateIndex(docs), "index"))
+	writeFile(buildDirectory + "/index.html", renderHtml(layout, generateIndex(docs), "index"))
 
 	// Render out all md -> html files
 	for _, doc := range docs {
@@ -127,9 +127,10 @@ func main() {
 		check(err)
 
 		md := string(mdBytes)
+		// TODO: Add some metadata to prevent linking of common words, eg 'now'
 		md = autolink(doc, md, docs)
 
-		html := renderHtml(md, doc.name)
+		html := renderHtml(layout, md, doc.name)
 
 		writeFile(buildDirectory + "/" + doc.htmlFile, html)		
 	}
