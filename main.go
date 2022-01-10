@@ -37,6 +37,16 @@ func toSentenceCase(str string) string {
 	return strings.ToUpper(str[0:1]) + str[1:len(str)]
 }
 
+func contains(list []string, element string) bool {
+	for _, item := range list {
+		if item == element {
+			return true
+		}
+	}
+
+	return false
+}
+
 func getFiles(directory string) []document {
 	contents, err := os.ReadDir(directory)
 	check(err)
@@ -71,8 +81,11 @@ func generateIndex(docs []document) string {
 }
 
 func autolink(doc document, md string, docs []document) string {
+	// Consider making this info a metadata of the pages rather than hardcoded
+	blocklist := []string{"links", "about", "now"}
+
 	for _, otherDoc := range docs {
-		if doc.name != otherDoc.name {
+		if doc.name != otherDoc.name && !contains(blocklist, otherDoc.name) {
 			regex := regexp.MustCompile("(?i)(\\W)(" + otherDoc.name + ")(\\W)")
 			md = regex.ReplaceAllString(string(md), "$1[$2](./" + otherDoc.htmlFile + ")$3")
 		}
@@ -127,7 +140,6 @@ func main() {
 		check(err)
 
 		md := string(mdBytes)
-		// TODO: Add some metadata to prevent linking of common words, eg 'now'
 		md = autolink(doc, md, docs)
 
 		html := renderHtml(layout, md, doc.name)
