@@ -139,6 +139,7 @@ func main() {
 		mdBytes, err := os.ReadFile(contentDirectory + "/" + doc.mdFile)
 		check(err)
 
+		// TODO: Insert some kind of "last modified" date via Git history?
 		md := string(mdBytes)
 		md = autolink(doc, md, docs)
 
