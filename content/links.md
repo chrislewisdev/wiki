@@ -12,6 +12,11 @@ This page contains links to pages, blog posts, or anything else online that I ha
 - [Gwern](https://www.gwern.net/index) - astounding depth on just about anything
 - [nobr.me](https://nobr.me/) - delightfully chaotic
 
+## Communities
+
+- [buymusic.club](https://buymusic.club/)
+
 ## Tools
 
 - [lazygit](https://github.com/jesseduffield/lazygit) - handy terminal-based UI for git
+- [cgit](https://git.zx2c4.com/cgit/) and [stagit](https://codemadness.org/stagit.html) - git web frontends
