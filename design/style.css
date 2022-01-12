@@ -1,0 +1,33 @@
+:root {
+    --background-color: #24283b;
+    --text-color: #c0caf5;
+    --accent-color: #f7768e;
+    --accent-secondary-color: #7aa2f7;
+}
+
+body {
+    font-family: monospace;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4 {
+    color: var(--accent-color);
+}
+
+a {
+    color: var(--accent-secondary-color);
+}
+
+.container {
+    max-width: 95%;
+    margin: 0 auto 0 auto;
+}
+
+@media screen and (min-width:1000px) {
+    .container {
+        max-width: 700px;
+    }
+}
+
+/* TODO: Add some <pre> styling to distinguish code blocks */

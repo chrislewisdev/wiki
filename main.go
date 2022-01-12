@@ -69,6 +69,16 @@ func ensureDirectoryExists(directory string) {
 	}
 }
 
+func copyIfExists(filename string, copyName string) {
+	stat, err := os.Stat(filename)
+	
+	if err == nil && stat.Mode().IsRegular() {
+		bytes, err := os.ReadFile(filename)
+		check(err)
+		writeFile(copyName, string(bytes))
+	}
+}
+
 func generateIndex(docs []document) string {
 	var index = ""
 
@@ -127,6 +137,7 @@ func main() {
 	ensureDirectoryExists(buildDirectory)
 
 	layout := template.Must(template.ParseFiles("design/layout.html"))
+	copyIfExists("design/style.css", "build/style.css")
 
 	docs := getFiles(contentDirectory)
 
